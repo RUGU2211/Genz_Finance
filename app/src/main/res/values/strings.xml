@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">GenZ Finance</string>
+
+    <!-- Other string resources -->
+    <string name="title_home">Home</string>
+    <string name="title_transactions">Transactions</string>
+    <string name="title_add">Add</string>
+    <string name="title_budget">Budget</string>
+    <string name="title_profile">Profile</string>
+    <string name="empty_transactions">No transactions found</string>
+    <string name="empty_budgets">No budgets found. Add a new budget to get started.</string>
+</resources>

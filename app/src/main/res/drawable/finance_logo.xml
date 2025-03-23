@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Background Circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100,100m-95,0a95,95 0,1 1,190 0a95,95 0,1 1,-190 0" />
+
+    <!-- Dollar Symbol -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M100,50L100,150M85,65L115,65M85,135L115,135M85,100L115,100"
+        android:strokeWidth="12"
+        android:strokeColor="#2196F3"
+        android:strokeLineCap="round" />
+
+    <!-- Graph Lines -->
+    <path
+        android:pathData="M55,120L75,100L95,115L115,85L135,105L155,75"
+        android:strokeWidth="8"
+        android:strokeColor="#4CAF50"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Coins -->
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M60,140m-15,0a15,15 0,1 1,30 0a15,15 0,1 1,-30 0" />
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M85,150m-15,0a15,15 0,1 1,30 0a15,15 0,1 1,-30 0" />
+    <path
+        android:fillColor="#FF5722"
+        android:pathData="M115,150m-15,0a15,15 0,1 1,30 0a15,15 0,1 1,-30 0" />
+    <path
+        android:fillColor="#F44336"
+        android:pathData="M140,140m-15,0a15,15 0,1 1,30 0a15,15 0,1 1,-30 0" />
+</vector>
