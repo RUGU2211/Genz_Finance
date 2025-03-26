@@ -185,16 +185,16 @@ public class ProfileFragment extends Fragment {
             return;
         }
 
-        userViewModel.getUser().observe(getViewLifecycleOwner(), user -> {
-            if (user != null) {
-                user.setName(name);
-                user.setEmail(email);
-                user.setProfileImagePath(selectedImagePath);
+        // Get the current user value directly instead of observing
+        User user = userViewModel.getUser().getValue();
+        if (user != null) {
+            user.setName(name);
+            user.setEmail(email);
+            user.setProfileImagePath(selectedImagePath);
 
-                userViewModel.update(user);
-                Toast.makeText(requireContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
-            }
-        });
+            userViewModel.update(user);
+            Toast.makeText(requireContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void exportUserData() {
