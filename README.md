@@ -115,3 +115,7 @@ For detailed dependency information, check the `libs.versions.toml` file.
 
 ## License
 © 2025 Rugved Manoj Kharde, NMIMS Mumbai. All Rights Reserved.
+
+
+![image](https://github.com/user-attachments/assets/67938661-4caf-45f3-ad36-5365d14e74b1)
+
