@@ -107,7 +107,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📞 Contact
 - **Author**: Rugved Manoj Kharde
 - **Email**: RUGEVD.KHARDE81@nmims.in
-- **Project Link**: [Your GitHub Repository URL]
+- **Project Link**: https://github.com/RUGU2211/Genz_Finance.git
 
 ---
 **Built with ❤️ for Financial Empowerment**
