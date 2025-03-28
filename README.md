@@ -29,7 +29,7 @@ Finance Manager is a comprehensive Android application designed to empower users
 ## 🖼️ App Screenshots
 
 ### Splash Screen
-<img src="https://github.com/RUGU2211/Genz_Finance/tree/b4ca79b00395d1cda926db649f7023b5fe0b8d13/screenshot/img_1.png" width="250" alt="Splash Screen">
+<img src="screenshot/img_1.png" width="250" alt="Splash Screen">
 
 ### Profile Management
 <img src="https://github.com/RUGU2211/Genz_Finance/tree/b4ca79b00395d1cda926db649f7023b5fe0b8d13/screenshot/img_2.png" width="250" alt="Profile Screen">
