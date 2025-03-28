@@ -117,5 +117,14 @@ For detailed dependency information, check the `libs.versions.toml` file.
 © 2025 Rugved Manoj Kharde, NMIMS Mumbai. All Rights Reserved.
 
 
-![image](https://github.com/user-attachments/assets/67938661-4caf-45f3-ad36-5365d14e74b1)
+![image](https://github.com/user-attachments/assets/67938661-4caf-45f3-ad36-5365d14e74b1) ![Splash](https://github.com/user-attachments/assets/3972d747-1e9e-4074-9d4a-e2c049fad6b5)
+![profile](https://github.com/user-attachments/assets/46cbcaa7-c95e-4b68-a883-1e46fba6c573) ![Budget](https://github.com/user-attachments/assets/e4aa6b3f-0a48-4c8a-99ae-9e4fabe9e9ea)
+![Add budget](https://github.com/user-attachments/assets/c74fe9fb-4635-4b69-9b25-674b9f39927f) ![Add Transaction](https://github.com/user-attachments/assets/116c313b-7ea8-4631-803d-43d14136ba82)
+![Transaction Home screen](https://github.com/user-attachments/assets/2c110b51-cfe3-40c1-9ce5-c8c6d5f125d3) ![Dashboard](https://github.com/user-attachments/assets/519949a9-1aeb-403e-962f-fb1e7cbc1050)
+
+
+
+
+
+
 
