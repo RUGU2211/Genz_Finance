@@ -32,28 +32,28 @@ Finance Manager is a comprehensive Android application designed to empower users
 <img src="screenshot/img_1.png" width="250" alt="Splash Screen">
 
 ### Profile Management
-<img src="https://github.com/RUGU2211/Genz_Finance/tree/b4ca79b00395d1cda926db649f7023b5fe0b8d13/screenshot/img_2.png" width="250" alt="Profile Screen">
+<img src="screenshot/img_2.png" width="250" alt="Profile Screen">
 
 ### Budget Overview
-<img src="https://github.com/RUGU2211/Genz_Finance/tree/b4ca79b00395d1cda926db649f7023b5fe0b8d13/screenshot/img_4.png" width="250" alt="Budget Screen">
+<img src="screenshot/img_4.png" width="250" alt="Budget Screen">
 
 ### Add Budget
-<img src="https://github.com/RUGU2211/Genz_Finance/tree/b4ca79b00395d1cda926db649f7023b5fe0b8d13/screenshot/img_5.png" width="250" alt="Add Budget Screen">
+<img src="screenshot/img_5.png" width="250" alt="Add Budget Screen">
 
 ### Add Transaction
-<img src="https://github.com/RUGU2211/Genz_Finance/tree/b4ca79b00395d1cda926db649f7023b5fe0b8d13/screenshot/img_3.png" width="250" alt="Add Transaction Screen">
+<img src="screenshot/img_3.png" width="250" alt="Add Transaction Screen">
 
 ### Transaction Home
-<img src="https://github.com/RUGU2211/Genz_Finance/tree/b4ca79b00395d1cda926db649f7023b5fe0b8d13/screenshot/img_7.png" width="250" alt="Transaction Home Screen">
+<img src="screenshot/img_7.png" width="250" alt="Transaction Home Screen">
 
 ### Dashboard
-<img src="https://github.com/RUGU2211/Genz_Finance/tree/b4ca79b00395d1cda926db649f7023b5fe0b8d13/screenshot/img_6.png" width="250" alt="Dashboard Screen">
+<img src="screenshot/img_6.png" width="250" alt="Dashboard Screen">
 
 ### Data Export
-<img src="https://github.com/RUGU2211/Genz_Finance/tree/b4ca79b00395d1cda926db649f7023b5fe0b8d13/screenshot/img_2.png" width="250" alt="Export Data Screen">
+<img src="screenshot/img_2.png" width="250" alt="Export Data Screen">
 
 ### Export Confirmation
-<img src="https://github.com/RUGU2211/Genz_Finance/tree/b4ca79b00395d1cda926db649f7023b5fe0b8d13/screenshot/img_8.png" width="250" alt="Data Exported Screen">
+<img src="screenshot/img_8.png" width="250" alt="Data Exported Screen">
 
 ## 🏗️ Technical Architecture
 
