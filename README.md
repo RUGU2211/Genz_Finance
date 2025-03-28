@@ -29,31 +29,31 @@ Finance Manager is a comprehensive Android application designed to empower users
 ## 🖼️ App Screenshots
 
 ### Splash Screen
-<img src="screenshots/img1.png" width="250" alt="Splash Screen">
+<img src="screenshot/img1.png" width="250" alt="Splash Screen">
 
 ### Profile Management
-<img src="screenshots/img2.png" width="250" alt="Profile Screen">
+<img src="screenshot/img2.png" width="250" alt="Profile Screen">
 
 ### Budget Overview
-<img src="screenshots/img4.png" width="250" alt="Budget Screen">
+<img src="screenshot/img4.png" width="250" alt="Budget Screen">
 
 ### Add Budget
-<img src="screenshots/img5.png" width="250" alt="Add Budget Screen">
+<img src="screenshot/img5.png" width="250" alt="Add Budget Screen">
 
 ### Add Transaction
-<img src="screenshots/img3.png" width="250" alt="Add Transaction Screen">
+<img src="screenshot/img3.png" width="250" alt="Add Transaction Screen">
 
 ### Transaction Home
-<img src="screenshots/img7.png" width="250" alt="Transaction Home Screen">
+<img src="screenshot/img7.png" width="250" alt="Transaction Home Screen">
 
 ### Dashboard
-<img src="screenshots/img6.png" width="250" alt="Dashboard Screen">
+<img src="screenshot/img6.png" width="250" alt="Dashboard Screen">
 
 ### Data Export
-<img src="screenshots/img2.png" width="250" alt="Export Data Screen">
+<img src="screenshot/img2.png" width="250" alt="Export Data Screen">
 
 ### Export Confirmation
-<img src="screenshots/img8.png" width="250" alt="Data Exported Screen">
+<img src="screenshot/img8.png" width="250" alt="Data Exported Screen">
 
 ## 🏗️ Technical Architecture
 
