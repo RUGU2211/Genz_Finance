@@ -1,121 +1,117 @@
-# Finance Manager
+# 💰 Finance Manager
 
-A comprehensive Android application for personal finance management, budgeting, and expense tracking.
+## 🌟 Overview
 
-## Overview
+Finance Manager is a comprehensive Android application designed to empower users in managing their personal finances with ease and precision. Track expenses, set budgets, and gain deep insights into your financial health through an intuitive and feature-rich interface.
 
-Finance Manager helps users track their daily expenses, manage budgets, and gain insights into their spending habits. The application provides an intuitive interface for recording transactions, setting up budgets for different categories, and visualizing financial data.
+## ✨ Key Features
 
-## Features
+- 📊 **Comprehensive Transaction Management**
+  - Add, edit, and delete income and expense transactions
+  - Organize transactions with customizable categories
 
-- **Transaction Management**: Add, edit, and delete income and expense transactions
-- **Budget Planning**: Create and manage budgets for different spending categories
-- **Financial Dashboard**: View summaries and visualizations of your financial status
-- **User Profiles**: Manage user information and preferences
-- **Transaction Categories**: Organize transactions by customizable categories
-- **Currency Formatting**: Support for different currency formats
-- **Date Filtering**: Filter transactions by date ranges
+- 💰 **Smart Budget Planning**
+  - Create and manage budgets for different spending categories
+  - Real-time budget tracking and alerts
 
-## Project Structure
+- 📈 **Insightful Financial Dashboard**
+  - Visualize your financial status with interactive charts and summaries
+  - Gain actionable insights into your spending patterns
 
-### Data Layer
+- 👤 **Personalized User Profiles**
+  - Manage personal information and app preferences
+  - Customize your financial tracking experience
 
-The app follows the Room database architecture for local data persistence:
+- 🌍 **Flexible Currency Support**
+  - Multi-currency formatting
+  - Easy date range filtering
 
-- **DAO (Data Access Object)**
-  - `BudgetDao`: Interface for budget-related database operations
-  - `TransactionDao`: Interface for transaction-related database operations
-  - `UserDao`: Interface for user-related database operations
+## 🖼️ App Screenshots
 
-- **Entities**
-  - `Budget`: Data model for budget information
-  - `Transaction`: Data model for transaction information
-  - `User`: Data model for user information
+### Splash Screen
+<img src="screenshots/splash.png" width="250" alt="Splash Screen">
 
-- **Repositories**
-  - `BudgetRepository`: Manages budget data operations
-  - `TransactionRepository`: Manages transaction data operations
-  - `UserRepository`: Manages user data operations
+### Profile Management
+<img src="screenshots/profile.png" width="250" alt="Profile Screen">
 
-- **Database**
-  - `AppDatabase`: Main database configuration for the application
+### Budget Overview
+<img src="screenshots/budget.png" width="250" alt="Budget Screen">
 
-### UI Layer
+### Add Budget
+<img src="screenshots/add_budget.png" width="250" alt="Add Budget Screen">
 
-The app follows MVVM (Model-View-ViewModel) architecture:
+### Add Transaction
+<img src="screenshots/add_transaction.png" width="250" alt="Add Transaction Screen">
 
-- **Adapters**
-  - `BudgetAdapter`: RecyclerView adapter for displaying budgets
-  - `TransactionAdapter`: RecyclerView adapter for displaying transactions
+### Transaction Home
+<img src="screenshots/transaction_home.png" width="250" alt="Transaction Home Screen">
 
-- **Fragments**
-  - `AddEditBudgetFragment`: UI for adding or editing budgets
-  - `AddTransactionFragment`: UI for adding new transactions
-  - `BudgetFragment`: UI for displaying budget information
-  - `EditTransactionFragment`: UI for editing existing transactions
-  - `HomeFragment`: Main dashboard UI
-  - `ProfileFragment`: UI for user profile management
-  - `TransactionDetailFragment`: UI for detailed transaction view
-  - `TransactionsFragment`: UI for listing all transactions
+### Dashboard
+<img src="screenshots/dashboard.png" width="250" alt="Dashboard Screen">
 
-- **ViewModels**
-  - `BudgetViewModel`: Business logic for budget-related operations
-  - `TransactionViewModel`: Business logic for transaction-related operations
-  - `UserViewModel`: Business logic for user-related operations
+### Data Export
+<img src="screenshots/export_data.png" width="250" alt="Export Data Screen">
 
-### Utility Classes
+### Export Confirmation
+<img src="screenshots/data_exported.png" width="250" alt="Data Exported Screen">
 
-- `Constants`: Common constants used throughout the app
-- `CurrencyFormatter`: Utility for formatting currency values
-- `DateConverter`: Converter for date types in Room database
-- `DateUtils`: Date-related utility functions
+## 🏗️ Technical Architecture
 
-### Activities
+### 🔹 Data Layer
+- **Room Database** for local data persistence
+- Comprehensive Data Access Objects (DAOs)
+- Robust data models for Budget, Transaction, and User
 
-- `MainActivity`: Main container activity
-- `SplashActivity`: Launch screen
+### 🔹 Presentation Layer
+- **MVVM Architecture**
+- Jetpack Navigation Component
+- Material Design UI Components
 
-### Resources
+## 🚀 Getting Started
 
-- Various layouts, drawables, and menu resources for UI implementation
-- Navigation components for seamless navigation between fragments
-
-## Technical Implementation
-
-- **Architecture**: MVVM (Model-View-ViewModel)
-- **Database**: Room Persistence Library
-- **Navigation**: Jetpack Navigation Component
-- **UI Components**: Material Design components
-- **Build System**: Gradle with Kotlin DSL
-
-## Getting Started
-
-1. Clone the repository
-2. Open the project in Android Studio
-3. Sync the Gradle files
-4. Run the application on an emulator or physical device
-
-## Requirements
-
+### Prerequisites
 - Android Studio Arctic Fox or later
-- Minimum SDK version: 21 (Android 5.0 Lollipop)
-- Target SDK version: 33 (Android 13)
+- Android SDK 21+ (Lollipop)
+- Gradle with Kotlin DSL support
 
-## Dependencies
+### Installation
+1. Clone the repository
+```bash
+git clone https://github.com/RUGU2211/finance-manager.git
+```
 
-The app uses several key dependencies:
+2. Open in Android Studio
+3. Sync Gradle files
+4. Run on emulator or device
 
-- AndroidX libraries
+## 🛠️ Tech Stack
+- Language: Kotlin
+- Architecture: MVVM
+- Database: Room Persistence Library
+- UI: Material Design Components
+- Navigation: Jetpack Navigation
+
+## 📦 Key Dependencies
+- AndroidX Libraries
 - Room Persistence Library
-- Lifecycle components
-- Material Design components
-- Navigation components
+- Lifecycle Components
+- Material Design
+- Navigation Components
 
-For detailed dependency information, check the `libs.versions.toml` file.
+## 🤝 Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## License
+## 📄 License
 © 2025 Rugved Manoj Kharde, NMIMS Mumbai. All Rights Reserved.
 
+## 📞 Contact
+- **Author**: Rugved Manoj Kharde
+- **Email**: RUGEVD.KHARDE81@nmims.in
+- **Project Link**: [Your GitHub Repository URL]
+
+---
+
+🌈 **Built with ❤️ for Financial Empowerment**
 
 ![image](https://github.com/user-attachments/assets/67938661-4caf-45f3-ad36-5365d14e74b1) 
 Splash![Splash](https://github.com/user-attachments/assets/3972d747-1e9e-4074-9d4a-e2c049fad6b5)
