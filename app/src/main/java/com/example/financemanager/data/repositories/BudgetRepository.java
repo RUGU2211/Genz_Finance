@@ -18,7 +18,7 @@ public class BudgetRepository {
     private final LiveData<Double> totalBudget;
 
     public BudgetRepository(Application application) {
-        AppDatabase database = AppDatabase.getInstance(application);
+        AppDatabase database = AppDatabase.getDatabase(application);
         budgetDao = database.budgetDao();
         allBudgets = budgetDao.getAllBudgets();
         totalBudget = budgetDao.getTotalBudget();

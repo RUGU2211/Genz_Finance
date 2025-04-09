@@ -3,69 +3,131 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/navigation_home">
+    app:startDestination="@id/loginFragment">
 
     <fragment
-        android:id="@+id/navigation_home"
+        android:id="@+id/loginFragment"
+        android:name="com.example.financemanager.ui.fragments.LoginFragment"
+        android:label="Sign In">
+        <action
+            android:id="@+id/action_loginFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_loginFragment_to_signupFragment"
+            app:destination="@id/signupFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/signupFragment"
+        android:name="com.example.financemanager.ui.fragments.SignUpFragment"
+        android:label="Create Account">
+        <action
+            android:id="@+id/action_signupFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_signupFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/homeFragment"
         android:name="com.example.financemanager.ui.fragments.HomeFragment"
-        android:label="Home"
-        tools:layout="@layout/fragment_home" />
+        android:label="Financial Dashboard">
+        <action
+            android:id="@+id/action_homeFragment_to_transactionFragment"
+            app:destination="@id/transactionFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_transactionDetailFragment"
+            app:destination="@id/transactionDetailFragment">
+            <argument
+                android:name="transactionId"
+                app:argType="string" />
+        </action>
+    </fragment>
 
     <fragment
-        android:id="@+id/navigation_transactions"
-        android:name="com.example.financemanager.ui.fragments.TransactionsFragment"
-        android:label="Transactions"
-        tools:layout="@layout/fragment_transactions" />
+        android:id="@+id/transactionFragment"
+        android:name="com.example.financemanager.ui.fragments.TransactionFragment"
+        android:label="Transaction History">
+        <action
+            android:id="@+id/action_transactionFragment_to_editTransactionFragment"
+            app:destination="@id/editTransactionFragment" />
+        <action
+            android:id="@+id/action_transactionFragment_to_addTransactionFragment"
+            app:destination="@id/addTransactionFragment" />
+        <action
+            android:id="@+id/action_transactionFragment_to_transactionDetailFragment"
+            app:destination="@id/transactionDetailFragment">
+            <argument
+                android:name="transactionId"
+                app:argType="string" />
+        </action>
+    </fragment>
 
     <fragment
-        android:id="@+id/navigation_add"
+        android:id="@+id/profileFragment"
+        android:name="com.example.financemanager.ui.fragments.ProfileFragment"
+        android:label="My Profile" />
+
+    <fragment
+        android:id="@+id/editTransactionFragment"
+        android:name="com.example.financemanager.ui.fragments.EditTransactionFragment"
+        android:label="Edit Transaction">
+        <argument
+            android:name="transactionId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addTransactionFragment"
         android:name="com.example.financemanager.ui.fragments.AddTransactionFragment"
         android:label="Add Transaction"
         tools:layout="@layout/fragment_add_transaction" />
 
     <fragment
-        android:id="@+id/navigation_budget"
+        android:id="@+id/budgetFragment"
         android:name="com.example.financemanager.ui.fragments.BudgetFragment"
-        android:label="Budget"
-        tools:layout="@layout/fragment_budget" />
-
-    <fragment
-        android:id="@+id/navigation_profile"
-        android:name="com.example.financemanager.ui.fragments.ProfileFragment"
-        android:label="Profile"
-        tools:layout="@layout/fragment_profile" />
+        android:label="Budget Management"
+        tools:layout="@layout/fragment_budget">
+        <action
+            android:id="@+id/action_budgetFragment_to_addEditBudgetFragment"
+            app:destination="@id/addEditBudgetFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/addEditBudgetFragment"
         android:name="com.example.financemanager.ui.fragments.AddEditBudgetFragment"
-        android:label="Add/Edit Budget"
-        tools:layout="@layout/fragment_add_edit_budget" />
+        android:label="Manage Budget"
+        tools:layout="@layout/fragment_add_edit_budget">
+        <argument
+            android:name="budgetId"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
 
     <fragment
         android:id="@+id/transactionDetailFragment"
         android:name="com.example.financemanager.ui.fragments.TransactionDetailFragment"
-        android:label="Transaction Detail"
+        android:label="Transaction Details"
         tools:layout="@layout/fragment_transaction_detail">
         <argument
             android:name="transactionId"
-            app:argType="integer" />
+            app:argType="string" />
+        <action
+            android:id="@+id/action_transactionDetail_to_editTransaction"
+            app:destination="@id/editTransactionFragment">
+            <argument
+                android:name="transactionId"
+                app:argType="string" />
+        </action>
     </fragment>
-
-    <!-- In nav_graph.xml -->
-    <fragment
-        android:id="@+id/editTransactionFragment"
-        android:name="com.example.financemanager.ui.fragments.EditTransactionFragment"
-        android:label="Edit Transaction"
-        tools:layout="@layout/fragment_edit_transaction">
-        <argument
-            android:name="transactionId"
-            app:argType="integer" />
-    </fragment>
-
-    <!-- Make sure this action is defined within transactionDetailFragment -->
-    <action
-        android:id="@+id/action_transactionDetail_to_editTransaction"
-        app:destination="@id/editTransactionFragment" />
 
     <action
         android:id="@+id/action_to_addEditBudgetFragment"
@@ -76,7 +138,7 @@
         app:destination="@id/transactionDetailFragment">
         <argument
             android:name="transactionId"
-            app:argType="integer" />
+            app:argType="string" />
     </action>
 
 </navigation>

@@ -2,15 +2,11 @@ package com.example.financemanager.ui.fragments;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,244 +19,318 @@ import com.example.financemanager.R;
 import com.example.financemanager.data.entities.Transaction;
 import com.example.financemanager.ui.viewmodels.TransactionViewModel;
 import com.example.financemanager.ui.viewmodels.UserViewModel;
-import com.example.financemanager.utils.Constants;
-import com.example.financemanager.utils.DateUtils;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 public class AddTransactionFragment extends Fragment {
 
     private TransactionViewModel transactionViewModel;
     private UserViewModel userViewModel;
-
-    private RadioGroup rgTransactionType;
-    private RadioButton rbIncome, rbExpense;
-    private TextInputEditText etAmount, etTitle, etDate, etNotes;
-    private AutoCompleteTextView dropdownCategory, dropdownPaymentMethod;
-    private Button btnAddTransaction;
-    private TextInputLayout tilAmount, tilTitle, tilCategory, tilPaymentMethod;
-
-    private Date selectedDate = new Date(); // Default to current date
-    private String currentType = Constants.TRANSACTION_TYPE_EXPENSE; // Default type
+    private TextInputLayout amountLayout;
+    private TextInputLayout titleLayout;
+    private TextInputLayout descriptionLayout;
+    private TextInputLayout categoryLayout;
+    private TextInputLayout paymentMethodLayout;
+    private MaterialButtonToggleGroup typeToggleGroup;
+    private MaterialButton dateButton;
+    private Date selectedDate;
+    private Calendar calendar;
+    private FirebaseAuth auth;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_add_transaction, container, false);
+        try {
+            View view = inflater.inflate(R.layout.fragment_add_transaction, container, false);
 
-        // Initialize views
-        rgTransactionType = view.findViewById(R.id.rg_transaction_type);
-        rbIncome = view.findViewById(R.id.rb_income);
-        rbExpense = view.findViewById(R.id.rb_expense);
-        etAmount = view.findViewById(R.id.et_amount);
-        etTitle = view.findViewById(R.id.et_title);
-        etDate = view.findViewById(R.id.et_date);
-        etNotes = view.findViewById(R.id.et_notes);
-        dropdownCategory = view.findViewById(R.id.dropdown_category);
-        dropdownPaymentMethod = view.findViewById(R.id.dropdown_payment_method);
-        btnAddTransaction = view.findViewById(R.id.btn_add_transaction);
+            // Initialize Firebase Auth
+            auth = FirebaseAuth.getInstance();
 
-        // Get TextInputLayouts for validation
-        tilAmount = view.findViewById(R.id.til_amount);
-        tilTitle = view.findViewById(R.id.til_title);
-        tilCategory = view.findViewById(R.id.til_category);
-        tilPaymentMethod = view.findViewById(R.id.til_payment_method);
+            // Initialize views
+            initializeViews(view);
 
-        // Setup ViewModels
-        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
-        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+            // Setup category dropdown
+            setupCategoryDropdown();
 
-        // Set default date
-        etDate.setText(DateUtils.formatDate(selectedDate));
+            // Setup date picker
+            setupDatePicker();
 
-        // Setup category dropdown based on transaction type
-        setupCategoryDropdown();
+            // Setup save button
+            setupSaveButton(view.findViewById(R.id.btn_save));
 
-        // Setup payment method dropdown
-        ArrayAdapter<String> paymentMethodAdapter = new ArrayAdapter<>(
-                requireContext(),
-                android.R.layout.simple_dropdown_item_1line,
-                Constants.DEFAULT_PAYMENT_METHODS
-        );
-        dropdownPaymentMethod.setAdapter(paymentMethodAdapter);
+            // Initialize ViewModels
+            transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
+            userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
 
-        // Setup listeners
-        setupListeners();
-
-        return view;
+            return view;
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error initializing view: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            return null;
+        }
     }
 
-    private void setupListeners() {
-        // Transaction type change
-        rgTransactionType.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.rb_income) {
-                currentType = Constants.TRANSACTION_TYPE_INCOME;
-            } else {
-                currentType = Constants.TRANSACTION_TYPE_EXPENSE;
-            }
-            setupCategoryDropdown();
-        });
-
-        // Date selection
-        etDate.setOnClickListener(v -> {
-            showDatePicker();
-        });
-
-        // Add transaction button
-        btnAddTransaction.setOnClickListener(v -> {
-            saveTransaction();
-        });
+    private void initializeViews(View view) {
+        try {
+            amountLayout = view.findViewById(R.id.layout_amount);
+            titleLayout = view.findViewById(R.id.layout_title);
+            descriptionLayout = view.findViewById(R.id.layout_description);
+            categoryLayout = view.findViewById(R.id.layout_category);
+            paymentMethodLayout = view.findViewById(R.id.layout_payment_method);
+            typeToggleGroup = view.findViewById(R.id.toggle_type);
+            dateButton = view.findViewById(R.id.btn_date);
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error initializing views: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     private void setupCategoryDropdown() {
-        List<String> categories = currentType.equals(Constants.TRANSACTION_TYPE_INCOME) ?
-                Constants.DEFAULT_INCOME_CATEGORIES : Constants.DEFAULT_EXPENSE_CATEGORIES;
-
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
-                requireContext(),
-                android.R.layout.simple_dropdown_item_1line,
-                categories
-        );
-        dropdownCategory.setAdapter(categoryAdapter);
-
-        // Clear current selection
-        dropdownCategory.setText("", false);
-    }
-
-    private void showDatePicker() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(selectedDate);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                requireContext(),
-                (view, year, month, dayOfMonth) -> {
-                    calendar.set(year, month, dayOfMonth);
-                    selectedDate = calendar.getTime();
-                    etDate.setText(DateUtils.formatDate(selectedDate));
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-        );
-        datePickerDialog.show();
-    }
-
-    private void saveTransaction() {
-        // Reset errors
-        tilAmount.setError(null);
-        tilTitle.setError(null);
-        tilCategory.setError(null);
-        tilPaymentMethod.setError(null);
-
-        // Validate inputs
-        if (!validateInputs()) {
-            return;
+        try {
+            String[] categories = {"Food", "Transport", "Shopping", "Bills", "Entertainment", "Health", "Education", "Other"};
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), 
+                    android.R.layout.simple_dropdown_item_1line, categories);
+            ((AutoCompleteTextView) categoryLayout.getEditText()).setAdapter(adapter);
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error setting up categories: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
+    }
 
-        // Get values from inputs
-        String title = etTitle.getText().toString().trim();
-        String category = dropdownCategory.getText().toString().trim();
-        double amount = Double.parseDouble(etAmount.getText().toString().trim());
-        String paymentMethod = dropdownPaymentMethod.getText().toString().trim();
-        String notes = etNotes.getText().toString().trim();
+    private void setupDatePicker() {
+        try {
+            calendar = Calendar.getInstance();
+            selectedDate = calendar.getTime();
+            updateDateButtonText();
 
-        // Create transaction object
-        Transaction transaction = new Transaction(
-                title,
-                category,
-                amount,
-                selectedDate,
-                currentType,
-                paymentMethod,
-                notes
-        );
-
-        // Save to database
-        transactionViewModel.insert(transaction);
-
-        // Update user totals
-        userViewModel.getUser().observe(getViewLifecycleOwner(), user -> {
-            if (user != null) {
-                double newBalance = user.getTotalBalance();
-                double newIncome = user.getTotalIncome();
-                double newExpense = user.getTotalExpense();
-
-                if (currentType.equals(Constants.TRANSACTION_TYPE_INCOME)) {
-                    newBalance += amount;
-                    newIncome += amount;
-                } else {
-                    newBalance -= amount;
-                    newExpense += amount;
+            dateButton.setOnClickListener(v -> {
+                try {
+                    DatePickerDialog datePickerDialog = new DatePickerDialog(
+                            requireContext(),
+                            (view, year, month, dayOfMonth) -> {
+                                calendar.set(Calendar.YEAR, year);
+                                calendar.set(Calendar.MONTH, month);
+                                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                                selectedDate = calendar.getTime();
+                                updateDateButtonText();
+                            },
+                            calendar.get(Calendar.YEAR),
+                            calendar.get(Calendar.MONTH),
+                            calendar.get(Calendar.DAY_OF_MONTH)
+                    );
+                    datePickerDialog.show();
+                } catch (Exception e) {
+                    Toast.makeText(requireContext(), "Error setting date: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
+            });
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error setting up date picker: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
 
-                userViewModel.updateBalance(newBalance);
-                userViewModel.updateIncome(newIncome);
-                userViewModel.updateExpense(newExpense);
+    private void updateDateButtonText() {
+        try {
+            dateButton.setText(String.format("%tF", selectedDate));
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error updating date: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void setupSaveButton(MaterialButton saveButton) {
+        saveButton.setOnClickListener(v -> {
+            try {
+                if (validateInputs()) {
+                    saveTransaction();
+                }
+            } catch (Exception e) {
+                Toast.makeText(requireContext(), "Error saving transaction: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-
-        // Show success message
-        Toast.makeText(requireContext(), "Transaction added successfully", Toast.LENGTH_SHORT).show();
-
-        // Navigate back to Home
-        Navigation.findNavController(requireView()).navigate(R.id.navigation_home);
     }
 
     private boolean validateInputs() {
-        boolean isValid = true;
+        try {
+            boolean isValid = true;
 
-        // Check amount
-        if (TextUtils.isEmpty(etAmount.getText())) {
-            tilAmount.setError("Amount is required");
-            isValid = false;
-        } else {
-            try {
-                double amount = Double.parseDouble(etAmount.getText().toString().trim());
-                if (amount <= 0) {
-                    tilAmount.setError("Amount must be greater than zero");
+            // Validate amount
+            String amountStr = amountLayout.getEditText().getText().toString().trim();
+            if (amountStr.isEmpty()) {
+                amountLayout.setError("Amount is required");
+                isValid = false;
+            } else {
+                try {
+                    double amount = Double.parseDouble(amountStr);
+                    if (amount <= 0) {
+                        amountLayout.setError("Amount must be greater than 0");
+                        isValid = false;
+                    } else {
+                        amountLayout.setError(null);
+                    }
+                } catch (NumberFormatException e) {
+                    amountLayout.setError("Invalid amount");
                     isValid = false;
                 }
-            } catch (NumberFormatException e) {
-                tilAmount.setError("Invalid amount");
-                isValid = false;
             }
-        }
 
-        // Check title
-        if (TextUtils.isEmpty(etTitle.getText())) {
-            tilTitle.setError("Title is required");
-            isValid = false;
-        }
+            // Validate title
+            String title = titleLayout.getEditText().getText().toString().trim();
+            if (title.isEmpty()) {
+                titleLayout.setError("Title is required");
+                isValid = false;
+            } else {
+                titleLayout.setError(null);
+            }
 
-        // Check category
-        if (TextUtils.isEmpty(dropdownCategory.getText())) {
-            tilCategory.setError("Category is required");
-            isValid = false;
-        }
+            // Validate category
+            String category = categoryLayout.getEditText().getText().toString().trim();
+            if (category.isEmpty()) {
+                categoryLayout.setError("Category is required");
+                isValid = false;
+            } else {
+                categoryLayout.setError(null);
+            }
 
-        // Check payment method
-        if (TextUtils.isEmpty(dropdownPaymentMethod.getText())) {
-            tilPaymentMethod.setError("Payment method is required");
-            isValid = false;
-        }
+            // Validate payment method
+            String paymentMethod = paymentMethodLayout.getEditText().getText().toString().trim();
+            if (paymentMethod.isEmpty()) {
+                paymentMethodLayout.setError("Payment method is required");
+                isValid = false;
+            } else {
+                paymentMethodLayout.setError(null);
+            }
 
-        return isValid;
+            return isValid;
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error validating inputs: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            return false;
+        }
     }
 
-    private void clearInputs() {
-        etAmount.setText("");
-        etTitle.setText("");
-        dropdownCategory.setText("", false);
-        dropdownPaymentMethod.setText("", false);
-        etNotes.setText("");
+    private void saveTransaction() {
+        try {
+            // Check if user is authenticated
+            if (auth.getCurrentUser() == null) {
+                Toast.makeText(requireContext(), "Please sign in to add transactions", Toast.LENGTH_SHORT).show();
+                Navigation.findNavController(requireView()).navigate(R.id.loginFragment);
+                return;
+            }
 
-        // Reset to defaults
-        rbExpense.setChecked(true);
-        selectedDate = new Date();
-        etDate.setText(DateUtils.formatDate(selectedDate));
+            // Disable save button to prevent double submission
+            MaterialButton saveButton = requireView().findViewById(R.id.btn_save);
+            saveButton.setEnabled(false);
+
+            // Get values from inputs with null checks
+            String title = getInputText(titleLayout);
+            String category = getInputText(categoryLayout);
+            String amountStr = getInputText(amountLayout);
+            String paymentMethod = getInputText(paymentMethodLayout);
+            String notes = descriptionLayout.getEditText() != null ? 
+                descriptionLayout.getEditText().getText().toString().trim() : "";
+
+            // Validate amount format
+            double amount;
+            try {
+                amount = Double.parseDouble(amountStr);
+                if (amount <= 0) {
+                    throw new IllegalArgumentException("Amount must be greater than 0");
+                }
+            } catch (NumberFormatException e) {
+                amountLayout.setError("Invalid amount format");
+                saveButton.setEnabled(true);
+                return;
+            }
+
+            String type = typeToggleGroup.getCheckedButtonId() == R.id.btn_income ? "income" : "expense";
+
+            // Create transaction object with validation
+            Transaction transaction = new Transaction();
+            transaction.setId(UUID.randomUUID().toString());
+            transaction.setTitle(title);
+            transaction.setCategory(category);
+            transaction.setAmount(amount);
+            transaction.setDate(selectedDate);
+            transaction.setType(type);
+            transaction.setPaymentMethod(paymentMethod);
+            transaction.setNotes(notes);
+            transaction.setUserId(auth.getCurrentUser().getUid());
+
+            // Observe loading and error states
+            transactionViewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
+                if (!isLoading) {
+                    saveButton.setEnabled(true);
+                }
+            });
+
+            transactionViewModel.getError().observe(getViewLifecycleOwner(), error -> {
+                if (error != null) {
+                    Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show();
+                } else {
+                    // No error means success
+                    Toast.makeText(requireContext(), "Transaction added successfully", Toast.LENGTH_SHORT).show();
+                    try {
+                        Navigation.findNavController(requireView()).navigateUp();
+                    } catch (Exception e) {
+                        // If navigation fails, try to navigate to home
+                        Navigation.findNavController(requireView()).navigate(R.id.homeFragment);
+                    }
+                }
+            });
+
+            // Save to database
+            transactionViewModel.addTransaction(transaction);
+
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error saving transaction: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            // Re-enable save button in case of error
+            MaterialButton saveButton = requireView().findViewById(R.id.btn_save);
+            if (saveButton != null) {
+                saveButton.setEnabled(true);
+            }
+        }
+    }
+
+    private String getInputText(TextInputLayout layout) {
+        if (layout == null || layout.getEditText() == null) {
+            throw new IllegalArgumentException("Input layout or edit text is null");
+        }
+        return layout.getEditText().getText().toString().trim();
+    }
+
+    private void updateUserBalance(String type, double amount) {
+        try {
+            userViewModel.getUser().observe(getViewLifecycleOwner(), user -> {
+                if (user != null) {
+                    double newBalance = user.getTotalBalance();
+                    double newIncome = user.getTotalIncome();
+                    double newExpense = user.getTotalExpense();
+
+                    if (type.equals("income")) {
+                        newBalance += amount;
+                        newIncome += amount;
+                    } else {
+                        newBalance -= amount;
+                        newExpense += amount;
+                    }
+
+                    // Update values individually
+                    userViewModel.updateBalance(newBalance);
+                    userViewModel.updateIncome(newIncome);
+                    userViewModel.updateExpense(newExpense);
+                } else {
+                    Toast.makeText(requireContext(), 
+                        "Transaction saved but user data not found", 
+                        Toast.LENGTH_LONG).show();
+                }
+            });
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), 
+                "Error updating balance: " + e.getMessage(), 
+                Toast.LENGTH_LONG).show();
+        }
     }
 }

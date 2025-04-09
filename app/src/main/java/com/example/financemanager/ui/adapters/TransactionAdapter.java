@@ -4,96 +4,75 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.financemanager.R;
 import com.example.financemanager.data.entities.Transaction;
-import com.example.financemanager.utils.CurrencyFormatter;
-import com.example.financemanager.utils.DateUtils;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdapter.TransactionViewHolder> {
+    private final OnTransactionClickListener listener;
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
 
-    private static final DiffUtil.ItemCallback<Transaction> DIFF_CALLBACK = new DiffUtil.ItemCallback<Transaction>() {
-        @Override
-        public boolean areItemsTheSame(@NonNull Transaction oldItem, @NonNull Transaction newItem) {
-            return oldItem.getId() == newItem.getId();
-        }
+    public interface OnTransactionClickListener {
+        void onTransactionClick(Transaction transaction);
 
-        @Override
-        public boolean areContentsTheSame(@NonNull Transaction oldItem, @NonNull Transaction newItem) {
-            return oldItem.getTitle().equals(newItem.getTitle()) &&
-                    oldItem.getAmount() == newItem.getAmount() &&
-                    oldItem.getCategory().equals(newItem.getCategory()) &&
-                    oldItem.getDate().equals(newItem.getDate()) &&
-                    oldItem.getType().equals(newItem.getType());
-        }
-    };
-    private OnItemClickListener listener;
+        void onTransactionLongClick(Transaction transaction);
+    }
 
-    public TransactionAdapter() {
-        super(DIFF_CALLBACK);
+    public TransactionAdapter(OnTransactionClickListener listener) {
+        super(new DiffUtil.ItemCallback<Transaction>() {
+            @Override
+            public boolean areItemsTheSame(@NonNull Transaction oldItem, @NonNull Transaction newItem) {
+                return oldItem.getId().equals(newItem.getId());
+            }
+
+            @Override
+            public boolean areContentsTheSame(@NonNull Transaction oldItem, @NonNull Transaction newItem) {
+                return oldItem.equals(newItem);
+            }
+        });
+        this.listener = listener;
     }
 
     @NonNull
     @Override
     public TransactionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext())
+        View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_transaction, parent, false);
-        return new TransactionViewHolder(itemView);
+        return new TransactionViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
-        Transaction currentTransaction = getItem(position);
-        holder.bind(currentTransaction);
+        Transaction transaction = getItem(position);
+        holder.bind(transaction, listener);
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.listener = listener;
-    }
+    static class TransactionViewHolder extends RecyclerView.ViewHolder {
+        private final TextView amountText;
+        private final TextView descriptionText;
+        private final TextView categoryText;
+        private final TextView dateText;
 
-    public interface OnItemClickListener {
-        void onItemClick(Transaction transaction);
-    }
-
-    class TransactionViewHolder extends RecyclerView.ViewHolder {
-        private final TextView tvCategory;
-        private final TextView tvTitle;
-        private final TextView tvDate;
-        private final TextView tvAmount;
-
-        public TransactionViewHolder(@NonNull View itemView) {
+        TransactionViewHolder(View itemView) {
             super(itemView);
-            tvCategory = itemView.findViewById(R.id.tv_category);
-            tvTitle = itemView.findViewById(R.id.tv_title);
-            tvDate = itemView.findViewById(R.id.tv_date);
-            tvAmount = itemView.findViewById(R.id.tv_amount);
-
-            itemView.setOnClickListener(v -> {
-                int position = getAdapterPosition();
-                if (listener != null && position != RecyclerView.NO_POSITION) {
-                    listener.onItemClick(getItem(position));
-                }
-            });
+            amountText = itemView.findViewById(R.id.text_amount);
+            descriptionText = itemView.findViewById(R.id.text_description);
+            categoryText = itemView.findViewById(R.id.text_category);
+            dateText = itemView.findViewById(R.id.text_date);
         }
 
-        public void bind(Transaction transaction) {
-            tvCategory.setText(transaction.getCategory());
-            tvTitle.setText(transaction.getTitle());
-            tvDate.setText(DateUtils.formatDate(transaction.getDate()));
+        void bind(Transaction transaction, OnTransactionClickListener listener) {
+            amountText.setText(String.format(Locale.getDefault(), "%.2f", transaction.getAmount()));
+            descriptionText.setText(transaction.getDescription());
+            categoryText.setText(transaction.getCategory());
+            dateText.setText(dateFormat.format(transaction.getDate()));
 
-            String amountText = CurrencyFormatter.format(transaction.getAmount());
-            if (transaction.getType().equals("EXPENSE")) {
-                tvAmount.setTextColor(itemView.getContext().getResources().getColor(R.color.colorExpense));
-                tvAmount.setText("- " + amountText);
-            } else {
-                tvAmount.setTextColor(itemView.getContext().getResources().getColor(R.color.colorIncome));
-                tvAmount.setText("+ " + amountText);
-            }
+            itemView.setOnClickListener(v -> listener.onTransactionClick(transaction));
         }
     }
 }

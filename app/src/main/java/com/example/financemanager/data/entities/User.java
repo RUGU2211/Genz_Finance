@@ -1,37 +1,51 @@
 package com.example.financemanager.data.entities;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+import com.example.financemanager.data.Converters;
+import java.util.Date;
 
 @Entity(tableName = "users")
 public class User {
-
     @PrimaryKey
-    private int id = 1; // Single user app, so fixed ID
-
+    @NonNull
+    private String id;
     private String name;
     private String email;
     private String profileImagePath;
     private double totalBalance;
     private double totalIncome;
     private double totalExpense;
+    
+    @TypeConverters(Converters.class)
+    private Date createdAt;
 
-    // Constructor
-    public User(String name, String email, String profileImagePath, double totalBalance, double totalIncome, double totalExpense) {
+    public User() {
+        // Required empty constructor for Room
+        this.id = ""; // Initialize with empty string to satisfy @NonNull
+        this.createdAt = new Date(); // Initialize with current date
+    }
+
+    @Ignore
+    public User(@NonNull String id, String name, String email, double totalBalance, double totalIncome, double totalExpense) {
+        this.id = id;
         this.name = name;
         this.email = email;
-        this.profileImagePath = profileImagePath;
         this.totalBalance = totalBalance;
         this.totalIncome = totalIncome;
         this.totalExpense = totalExpense;
+        this.createdAt = new Date();
     }
 
-    // Getters and Setters
-    public int getId() {
+    @NonNull
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(@NonNull String id) {
         this.id = id;
     }
 
@@ -81,5 +95,13 @@ public class User {
 
     public void setTotalExpense(double totalExpense) {
         this.totalExpense = totalExpense;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 }

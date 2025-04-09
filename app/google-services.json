@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1145654239",
+    "project_id": "financemanager-40ead",
+    "storage_bucket": "financemanager-40ead.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1145654239:android:0a701a6ae1a841ed00d26a",
+        "android_client_info": {
+          "package_name": "com.example.financemanager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1145654239-0a8a9uqs81n4psoudrfs4eb7vfnfkfkd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.financemanager",
+            "certificate_hash": "172a2bb3d1aae69d214de72e204cc5c74e60fb70"
+          }
+        },
+        {
+          "client_id": "1145654239-7l8enhrbh9f3dpeo9bglncngs6pmen5v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArzH1Hh9jkyzqiiHWuyCxCPVSUN9YdRcI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1145654239-7l8enhrbh9f3dpeo9bglncngs6pmen5v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

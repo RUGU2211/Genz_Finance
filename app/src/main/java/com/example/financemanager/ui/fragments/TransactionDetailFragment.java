@@ -1,6 +1,8 @@
 package com.example.financemanager.ui.fragments;
 
 import android.app.AlertDialog;
+import android.app.BroadcastOptions;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +25,8 @@ import com.example.financemanager.ui.viewmodels.UserViewModel;
 import com.example.financemanager.utils.Constants;
 import com.example.financemanager.utils.CurrencyFormatter;
 import com.example.financemanager.utils.DateUtils;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class TransactionDetailFragment extends Fragment {
 
@@ -33,16 +37,19 @@ public class TransactionDetailFragment extends Fragment {
     private ImageView ivTypeIcon, ivBack;
     private Button btnEdit, btnDelete;
 
-    private int transactionId;
+    private String transactionId;
     private Transaction currentTransaction;
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 
         // Get transaction ID from arguments
         if (getArguments() != null) {
-            transactionId = getArguments().getInt("transactionId", -1);
+            transactionId = getArguments().getString("transactionId", null);
         }
     }
 
@@ -77,8 +84,32 @@ public class TransactionDetailFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        BroadcastOptions TransactionDetailFragmentArgs = null;
+        String transactionId;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            transactionId = String.valueOf(TransactionDetailFragmentArgs.fromBundle(getArguments()).getClass());
+        } else {
+            transactionId = null;
+        }
+        if (transactionId != null) {
+            transactionViewModel.getAllTransactions().observe(getViewLifecycleOwner(), transactions -> {
+                for (Transaction transaction : transactions) {
+                    if (transaction.getId().equals(transactionId)) {
+                        currentTransaction = transaction;
+                        displayTransactionDetails(transaction);
+                        break;
+                    }
+                }
+            });
+        }
+    }
+
     private void loadTransactionData() {
-        if (transactionId == -1) {
+        if (transactionId == null) {
             // Invalid ID, navigate back
             Navigation.findNavController(requireView()).navigateUp();
             return;
@@ -88,7 +119,7 @@ public class TransactionDetailFragment extends Fragment {
         transactionViewModel.getAllTransactions().observe(getViewLifecycleOwner(), transactions -> {
             if (transactions != null) {
                 for (Transaction transaction : transactions) {
-                    if (transaction.getId() == transactionId) {
+                    if (transaction.getId().equals(transactionId)) {
                         currentTransaction = transaction;
                         displayTransactionDetails(transaction);
                         break;
@@ -113,7 +144,7 @@ public class TransactionDetailFragment extends Fragment {
             tvAmount.setText("- " + formattedAmount);
             tvAmount.setTextColor(getResources().getColor(R.color.colorExpense));
             tvType.setText("Expense");
-            ivTypeIcon.setImageResource(R.drawable.ic_expense); // Make sure you have this drawable
+            ivTypeIcon.setImageResource(R.drawable.ic_rupee); // Using rupee icon for expenses
         } else {
             tvAmount.setText("+ " + formattedAmount);
             tvAmount.setTextColor(getResources().getColor(R.color.colorIncome));
@@ -122,7 +153,7 @@ public class TransactionDetailFragment extends Fragment {
         }
 
         tvCategory.setText(transaction.getCategory());
-        tvDate.setText(DateUtils.formatDate(transaction.getDate()));
+        tvDate.setText(dateFormat.format(transaction.getDate()));
         tvPaymentMethod.setText(transaction.getPaymentMethod());
 
         // Handle notes - hide if empty
@@ -143,7 +174,7 @@ public class TransactionDetailFragment extends Fragment {
         // Edit button
         btnEdit.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
-            bundle.putInt("transactionId", transactionId);
+            bundle.putString("transactionId", transactionId);
             Navigation.findNavController(view).navigate(R.id.action_transactionDetail_to_editTransaction, bundle);
         });
 

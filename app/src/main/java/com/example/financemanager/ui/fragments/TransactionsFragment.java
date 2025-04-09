@@ -21,6 +21,7 @@ import com.example.financemanager.data.entities.Transaction;
 import com.example.financemanager.ui.adapters.TransactionAdapter;
 import com.example.financemanager.ui.viewmodels.TransactionViewModel;
 import com.example.financemanager.utils.Constants;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
 import java.text.SimpleDateFormat;
@@ -32,18 +33,25 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class TransactionsFragment extends Fragment {
+public class TransactionsFragment extends Fragment implements TransactionAdapter.OnTransactionClickListener {
 
     private TransactionViewModel transactionViewModel;
     private RecyclerView rvTransactions;
     private TransactionAdapter adapter;
     private TabLayout tabLayout;
     private TextView tvDateRange, tvSort, tvNoTransactions;
+    private FloatingActionButton fabAddTransaction;
 
     private Date startDate, endDate;
     private String currentType = "ALL"; // ALL, INCOME, EXPENSE
     private String currentSort = "DATE_DESC"; // DATE_DESC, DATE_ASC, AMOUNT_DESC, AMOUNT_ASC
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.US);
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
+    }
 
     @Nullable
     @Override
@@ -56,25 +64,32 @@ public class TransactionsFragment extends Fragment {
         tvDateRange = view.findViewById(R.id.tv_date_range);
         tvSort = view.findViewById(R.id.tv_sort);
         tvNoTransactions = view.findViewById(R.id.tv_no_transactions);
+        fabAddTransaction = view.findViewById(R.id.fab_add_transaction);
 
         // Setup RecyclerView
         rvTransactions.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new TransactionAdapter();
+        adapter = new TransactionAdapter(this);
         rvTransactions.setAdapter(adapter);
-
-        // Setup ViewModel
-        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
 
         // Set default date range to current month
         setCurrentMonthDateRange();
-
-        // Observe transactions
-        observeTransactions();
 
         // Setup click listeners
         setupListeners(view);
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        fabAddTransaction.setOnClickListener(v -> 
+            Navigation.findNavController(view)
+                    .navigate(R.id.action_transactionsFragment_to_addTransactionFragment)
+        );
+
+        setupObservers();
     }
 
     private void setupListeners(View view) {
@@ -113,13 +128,6 @@ public class TransactionsFragment extends Fragment {
         // Sort options
         tvSort.setOnClickListener(v -> {
             showSortMenu(v);
-        });
-
-        // Item click
-        adapter.setOnItemClickListener(transaction -> {
-            Bundle bundle = new Bundle();
-            bundle.putInt("transactionId", transaction.getId());
-            Navigation.findNavController(view).navigate(R.id.action_to_transactionDetailFragment, bundle);
         });
     }
 
@@ -196,6 +204,27 @@ public class TransactionsFragment extends Fragment {
         popup.show();
     }
 
+    private void setupObservers() {
+        transactionViewModel.getAllTransactions().observe(getViewLifecycleOwner(), transactions -> {
+            if (transactions != null) {
+                updateEmptyState(transactions);
+                adapter.submitList(transactions);
+            } else {
+                adapter.submitList(new ArrayList<>());
+            }
+        });
+    }
+
+    private void updateEmptyState(List<Transaction> transactions) {
+        if (transactions.isEmpty()) {
+            tvNoTransactions.setVisibility(View.VISIBLE);
+            rvTransactions.setVisibility(View.GONE);
+        } else {
+            tvNoTransactions.setVisibility(View.GONE);
+            rvTransactions.setVisibility(View.VISIBLE);
+        }
+    }
+
     private void observeTransactions() {
         // Get transactions based on selected filters
         transactionViewModel.getTransactionsBetweenDates(startDate, endDate).observe(getViewLifecycleOwner(), transactions -> {
@@ -262,5 +291,18 @@ public class TransactionsFragment extends Fragment {
         }
 
         return result;
+    }
+
+    @Override
+    public void onTransactionClick(Transaction transaction) {
+        Bundle bundle = new Bundle();
+        bundle.putString("transactionId", transaction.getId());
+        Navigation.findNavController(requireView())
+                .navigate(R.id.action_transactionsFragment_to_transactionDetailFragment, bundle);
+    }
+
+    @Override
+    public void onTransactionLongClick(Transaction transaction) {
+
     }
 }

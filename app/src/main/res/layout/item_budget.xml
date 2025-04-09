@@ -41,7 +41,7 @@
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_category"
-            tools:text="Budget: $300.00" />
+            tools:text="Budget: ₹300.00" />
 
         <TextView
             android:id="@+id/tv_spent_amount"
@@ -51,7 +51,7 @@
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_budget_amount"
-            tools:text="Spent: $175.50" />
+            tools:text="Spent: ₹175.50" />
 
         <ProgressBar
             android:id="@+id/progress_bar"

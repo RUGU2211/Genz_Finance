@@ -58,8 +58,8 @@
                 android:hint="Category"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:startIconDrawable="@drawable/ic_category">
+                app:layout_constraintTop_toTopOf="parent">
+<!--                app:startIconDrawable="@drawable/ic_category">-->
 
                 <AutoCompleteTextView
                     android:id="@+id/dropdown_category"
@@ -80,8 +80,8 @@
                 android:hint="Budget Amount"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/til_category"
-                app:startIconDrawable="@drawable/ic_dollar">
+                app:layout_constraintTop_toBottomOf="@id/til_category">
+<!--                app:startIconDrawable="@drawable/ic_dollar">-->
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_amount"
@@ -159,7 +159,7 @@
                     android:textColor="@color/colorExpense"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    tools:text="$150.75" />
+                    tools:text="₹150.75" />
 
             </LinearLayout>
 

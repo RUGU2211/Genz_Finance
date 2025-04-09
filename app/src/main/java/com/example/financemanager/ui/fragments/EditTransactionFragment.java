@@ -29,6 +29,8 @@ import com.example.financemanager.utils.Constants;
 import com.example.financemanager.utils.DateUtils;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -48,33 +50,27 @@ public class EditTransactionFragment extends Fragment {
     private TextInputEditText etAmount, etTitle, etDate, etNotes;
     private AutoCompleteTextView dropdownCategory, dropdownPaymentMethod;
     private Button btnUpdateTransaction, btnCancel;
-
-    private int transactionId = -1;
-    private Transaction currentTransaction;
+    private MaterialButtonToggleGroup typeToggleGroup;
+    private MaterialButton dateButton;
     private Date selectedDate = new Date();
     private String currentType = Constants.TRANSACTION_TYPE_EXPENSE;
     private double originalAmount = 0;
     private String originalType = "";
+    private Calendar calendar;
+    private String transactionId;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Get transaction ID from arguments
         if (getArguments() != null) {
-            transactionId = getArguments().getInt("transactionId", -1);
-        }
-
-        if (transactionId == -1) {
-            // Invalid transaction ID, should not happen
-            Toast.makeText(requireContext(), "Invalid transaction", Toast.LENGTH_SHORT).show();
+            transactionId = getArguments().getString("transactionId");
         }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_edit_transaction, container, false);
+        View view = inflater.inflate(R.layout.fragment_add_transaction, container, false);
 
         // Initialize views
         ivBack = view.findViewById(R.id.iv_back);
@@ -90,6 +86,8 @@ public class EditTransactionFragment extends Fragment {
         dropdownPaymentMethod = view.findViewById(R.id.dropdown_payment_method);
         btnUpdateTransaction = view.findViewById(R.id.btn_update_transaction);
         btnCancel = view.findViewById(R.id.btn_cancel);
+        typeToggleGroup = view.findViewById(R.id.toggle_type);
+        dateButton = view.findViewById(R.id.btn_date);
 
         // Get TextInputLayouts for validation
         tilAmount = view.findViewById(R.id.til_amount);
@@ -98,7 +96,7 @@ public class EditTransactionFragment extends Fragment {
         tilPaymentMethod = view.findViewById(R.id.til_payment_method);
 
         // Setup ViewModels
-        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
+        transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 
         // Setup payment method dropdown
@@ -109,37 +107,33 @@ public class EditTransactionFragment extends Fragment {
         );
         dropdownPaymentMethod.setAdapter(paymentMethodAdapter);
 
+        // Setup category dropdown
+        setupCategoryDropdown();
+
+        // Setup date picker
+        setupDatePicker();
+
         // Load transaction data
         loadTransactionData();
 
         // Setup listeners
         setupListeners(view);
 
+        if (transactionId == null) {
+            Toast.makeText(requireContext(), "Error: Transaction ID not found", Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(requireView()).navigateUp();
+            return view;
+        }
+
         return view;
     }
 
     private void loadTransactionData() {
-        if (transactionId == -1) {
-            // Invalid ID, navigate back
-            Navigation.findNavController(requireView()).navigateUp();
-            return;
-        }
-
-        // Query all transactions and find the one with matching ID
         transactionViewModel.getAllTransactions().observe(getViewLifecycleOwner(), transactions -> {
-            if (transactions != null) {
-                for (Transaction transaction : transactions) {
-                    if (transaction.getId() == transactionId) {
-                        currentTransaction = transaction;
-                        populateFields(transaction);
-                        break;
-                    }
-                }
-
-                if (currentTransaction == null) {
-                    // Transaction not found
-                    Toast.makeText(requireContext(), "Transaction not found", Toast.LENGTH_SHORT).show();
-                    Navigation.findNavController(requireView()).navigateUp();
+            for (Transaction transaction : transactions) {
+                if (transaction.getId().equals(transactionId)) {
+                    populateFields(transaction);
+                    break;
                 }
             }
         });
@@ -167,7 +161,8 @@ public class EditTransactionFragment extends Fragment {
 
         // Set date
         selectedDate = transaction.getDate();
-        etDate.setText(DateUtils.formatDate(selectedDate));
+        calendar.setTime(selectedDate);
+        updateDateButtonText();
 
         // Setup category dropdown based on type
         setupCategoryDropdown();
@@ -180,6 +175,9 @@ public class EditTransactionFragment extends Fragment {
 
         // Set notes
         etNotes.setText(transaction.getNotes());
+
+        // Set type toggle
+        typeToggleGroup.check(transaction.getType().equals(Constants.TRANSACTION_TYPE_INCOME) ? R.id.btn_income : R.id.btn_expense);
     }
 
     private void setupCategoryDropdown() {
@@ -192,6 +190,31 @@ public class EditTransactionFragment extends Fragment {
                 categories
         );
         dropdownCategory.setAdapter(categoryAdapter);
+    }
+
+    private void setupDatePicker() {
+        calendar = Calendar.getInstance();
+        selectedDate = calendar.getTime();
+        updateDateButtonText();
+
+        dateButton.setOnClickListener(v -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    requireContext(),
+                    (view, year, month, dayOfMonth) -> {
+                        calendar.set(year, month, dayOfMonth);
+                        selectedDate = calendar.getTime();
+                        updateDateButtonText();
+                    },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH)
+            );
+            datePickerDialog.show();
+        });
+    }
+
+    private void updateDateButtonText() {
+        dateButton.setText(String.format("%tF", selectedDate));
     }
 
     private void setupListeners(View view) {
@@ -215,33 +238,10 @@ public class EditTransactionFragment extends Fragment {
             setupCategoryDropdown();
         });
 
-        // Date selection
-        etDate.setOnClickListener(v -> {
-            showDatePicker();
-        });
-
         // Update button
         btnUpdateTransaction.setOnClickListener(v -> {
             updateTransaction();
         });
-    }
-
-    private void showDatePicker() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(selectedDate);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                requireContext(),
-                (view, year, month, dayOfMonth) -> {
-                    calendar.set(year, month, dayOfMonth);
-                    selectedDate = calendar.getTime();
-                    etDate.setText(DateUtils.formatDate(selectedDate));
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-        );
-        datePickerDialog.show();
     }
 
     private void updateTransaction() {
@@ -256,21 +256,24 @@ public class EditTransactionFragment extends Fragment {
         double amount = Double.parseDouble(Objects.requireNonNull(etAmount.getText()).toString().trim());
         String paymentMethod = Objects.requireNonNull(dropdownPaymentMethod.getText()).toString().trim();
         String notes = etNotes.getText() != null ? etNotes.getText().toString().trim() : "";
+        String type = typeToggleGroup.getCheckedButtonId() == R.id.btn_income ? Constants.TRANSACTION_TYPE_INCOME : Constants.TRANSACTION_TYPE_EXPENSE;
 
         // Update transaction object
-        currentTransaction.setTitle(title);
-        currentTransaction.setCategory(category);
-        currentTransaction.setAmount(amount);
-        currentTransaction.setDate(selectedDate);
-        currentTransaction.setType(currentType);
-        currentTransaction.setPaymentMethod(paymentMethod);
-        currentTransaction.setNotes(notes);
+        Transaction transaction = new Transaction();
+        transaction.setId(transactionId);
+        transaction.setTitle(title);
+        transaction.setCategory(category);
+        transaction.setAmount(amount);
+        transaction.setDate(selectedDate);
+        transaction.setType(type);
+        transaction.setPaymentMethod(paymentMethod);
+        transaction.setNotes(notes);
 
         // Save to database
-        transactionViewModel.update(currentTransaction);
+        transactionViewModel.updateTransaction(transaction);
 
         // Update user balance based on changes
-        updateUserBalance(originalType, originalAmount, currentType, amount);
+        updateUserBalance(originalType, originalAmount, type, amount);
 
         // Show success message
         Toast.makeText(requireContext(), "Transaction updated successfully", Toast.LENGTH_SHORT).show();

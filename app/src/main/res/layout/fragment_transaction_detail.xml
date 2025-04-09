@@ -94,7 +94,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_title"
-                tools:text="-$120.50"
+                tools:text="-₹120.50"
                 tools:textColor="@color/colorExpense" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

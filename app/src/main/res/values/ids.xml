@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="action_signupFragment_to_loginFragment" type="id" />
+    <item name="action_transactionFragment_to_addTransactionFragment" type="id" />
+    <item name="action_transactionFragment_to_transactionDetailFragment" type="id" />
+    <item name="action_homeFragment_to_transactionDetailFragment" type="id" />
+    <item name="action_transactionsFragment_to_addTransactionFragment" type="id" />
+    <item name="action_transactionsFragment_to_transactionDetailFragment" type="id" />
+</resources>

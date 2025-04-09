@@ -1,23 +1,22 @@
 package com.example.financemanager.data.repositories;
 
-import android.app.Application;
 import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
 
-import com.example.financemanager.data.AppDatabase;
 import com.example.financemanager.data.dao.UserDao;
 import com.example.financemanager.data.entities.User;
 
 public class UserRepository {
 
     private final UserDao userDao;
-    private final LiveData<User> user;
+    private final String userId;
+    private LiveData<User> user;
 
-    public UserRepository(Application application) {
-        AppDatabase database = AppDatabase.getInstance(application);
-        userDao = database.userDao();
-        user = userDao.getUser();
+    public UserRepository(UserDao userDao, String userId) {
+        this.userDao = userDao;
+        this.userId = userId;
+        this.user = userDao.getUser(userId);
     }
 
     // Methods to access data from the database
@@ -27,23 +26,31 @@ public class UserRepository {
 
     // Operations on the database
     public void insert(User user) {
-        new InsertUserAsyncTask(userDao).execute(user);
+        new Thread(() -> userDao.insert(user)).start();
     }
 
     public void update(User user) {
-        new UpdateUserAsyncTask(userDao).execute(user);
+        new Thread(() -> userDao.update(user)).start();
+    }
+
+    public void delete(User user) {
+        new Thread(() -> userDao.delete(user)).start();
     }
 
     public void updateBalance(double balance) {
-        new UpdateBalanceAsyncTask(userDao).execute(balance);
+        userDao.updateBalance(userId, balance);
     }
 
     public void updateIncome(double income) {
-        new UpdateIncomeAsyncTask(userDao).execute(income);
+        userDao.updateIncome(userId, income);
     }
 
     public void updateExpense(double expense) {
-        new UpdateExpenseAsyncTask(userDao).execute(expense);
+        userDao.updateExpense(userId, expense);
+    }
+
+    public LiveData<Boolean> checkUserExists() {
+        return userDao.checkUserExists();
     }
 
     // AsyncTask classes for database operations
@@ -77,42 +84,48 @@ public class UserRepository {
 
     private static class UpdateBalanceAsyncTask extends AsyncTask<Double, Void, Void> {
         private final UserDao userDao;
+        private final String userId;
 
-        private UpdateBalanceAsyncTask(UserDao userDao) {
+        private UpdateBalanceAsyncTask(UserDao userDao, String userId) {
             this.userDao = userDao;
+            this.userId = userId;
         }
 
         @Override
         protected Void doInBackground(Double... balances) {
-            userDao.updateBalance(balances[0]);
+            userDao.updateBalance(userId, balances[0]);
             return null;
         }
     }
 
     private static class UpdateIncomeAsyncTask extends AsyncTask<Double, Void, Void> {
         private final UserDao userDao;
+        private final String userId;
 
-        private UpdateIncomeAsyncTask(UserDao userDao) {
+        private UpdateIncomeAsyncTask(UserDao userDao, String userId) {
             this.userDao = userDao;
+            this.userId = userId;
         }
 
         @Override
         protected Void doInBackground(Double... incomes) {
-            userDao.updateIncome(incomes[0]);
+            userDao.updateIncome(userId, incomes[0]);
             return null;
         }
     }
 
     private static class UpdateExpenseAsyncTask extends AsyncTask<Double, Void, Void> {
         private final UserDao userDao;
+        private final String userId;
 
-        private UpdateExpenseAsyncTask(UserDao userDao) {
+        private UpdateExpenseAsyncTask(UserDao userDao, String userId) {
             this.userDao = userDao;
+            this.userId = userId;
         }
 
         @Override
         protected Void doInBackground(Double... expenses) {
-            userDao.updateExpense(expenses[0]);
+            userDao.updateExpense(userId, expenses[0]);
             return null;
         }
     }

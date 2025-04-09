@@ -1,56 +1,60 @@
 package com.example.financemanager.data.entities;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
-
-import com.example.financemanager.utils.DateConverter;
-
+import com.example.financemanager.data.Converters;
 import java.util.Date;
 
 @Entity(tableName = "transactions")
 public class Transaction {
-
-    @PrimaryKey(autoGenerate = true)
-    private int id;
-
-    private String title;
+    @PrimaryKey
+    @NonNull
+    private String id;
+    private String type; // "income" or "expense"
     private String category;
     private double amount;
-
-    @TypeConverters(DateConverter.class)
-    private Date date;
-
-    private String type; // "INCOME" or "EXPENSE"
+    private String description;
+    private String title;
     private String paymentMethod;
     private String notes;
+    @TypeConverters(Converters.class)
+    private Date date;
+    private String userId;
 
-    // Constructor
-    public Transaction(String title, String category, double amount, Date date, String type, String paymentMethod, String notes) {
-        this.title = title;
-        this.category = category;
-        this.amount = amount;
-        this.date = date;
-        this.type = type;
-        this.paymentMethod = paymentMethod;
-        this.notes = notes;
+    // Empty constructor for Room
+    public Transaction() {
+        this.id = ""; // Initialize with empty string to satisfy @NonNull
     }
 
-    // Getters and Setters
-    public int getId() {
+    @Ignore
+    public Transaction(@NonNull String id, String type, String category, double amount, String description, Date date, String userId) {
+        this.id = id;
+        this.type = type;
+        this.category = category;
+        this.amount = amount;
+        this.description = description;
+        this.date = date;
+        this.userId = userId;
+    }
+
+    @NonNull
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(@NonNull String id) {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
+    public String getType() {
+        return type;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getCategory() {
@@ -69,20 +73,20 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public Date getDate() {
-        return date;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public String getType() {
-        return type;
+    public String getTitle() {
+        return title;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getPaymentMethod() {
@@ -99,5 +103,21 @@ public class Transaction {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

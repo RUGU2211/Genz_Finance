@@ -15,6 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,6 +35,9 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -41,7 +45,7 @@ import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements TransactionAdapter.OnTransactionClickListener {
 
     private TransactionViewModel transactionViewModel;
     private UserViewModel userViewModel;
@@ -50,6 +54,13 @@ public class HomeFragment extends Fragment {
     private PieChart chartExpenses;
     private RecyclerView rvRecentTransactions;
     private TransactionAdapter transactionAdapter;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+    }
 
     @Nullable
     @Override
@@ -61,78 +72,87 @@ public class HomeFragment extends Fragment {
         tvTotalBalance = view.findViewById(R.id.tv_total_balance);
         tvIncome = view.findViewById(R.id.tv_income);
         tvExpense = view.findViewById(R.id.tv_expense);
-
-        // Initialize profile image view
-        ivProfile = view.findViewById(R.id.iv_profile);
-
-        // Set default profile image immediately
-        ivProfile.setImageResource(R.drawable.default_profile);
-
-        // Make sure image view is visible
-        ivProfile.setVisibility(View.VISIBLE);
-
-        // Initialize views
-        tvUserName = view.findViewById(R.id.tv_user_name);
-        tvTotalBalance = view.findViewById(R.id.tv_total_balance);
-        tvIncome = view.findViewById(R.id.tv_income);
-        tvExpense = view.findViewById(R.id.tv_expense);
         ivProfile = view.findViewById(R.id.iv_profile);
         chartExpenses = view.findViewById(R.id.chart_expenses);
         rvRecentTransactions = view.findViewById(R.id.rv_recent_transactions);
 
+        // Set default profile image immediately
+        ivProfile.setImageResource(R.drawable.default_profile);
+        ivProfile.setVisibility(View.VISIBLE);
+
         // Setup RecyclerView
         rvRecentTransactions.setLayoutManager(new LinearLayoutManager(getContext()));
-        transactionAdapter = new TransactionAdapter();
+        transactionAdapter = new TransactionAdapter(this);
         rvRecentTransactions.setAdapter(transactionAdapter);
-
-        // Setup ViewModels
-        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
-        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 
         // Setup chart
         setupPieChart();
 
-        // Observe data changes
-        observeUserData();
-        observeTransactions();
-        observeExpensesByCategory();
-
         // Setup click listeners
         view.findViewById(R.id.tv_transactions_see_all).setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.navigation_transactions);
-        });
-
-        transactionAdapter.setOnItemClickListener(transaction -> {
-            Bundle bundle = new Bundle();
-            bundle.putInt("transactionId", transaction.getId());
-            Navigation.findNavController(view).navigate(R.id.action_to_transactionDetailFragment, bundle);
+            Navigation.findNavController(v).navigate(R.id.transactionFragment);
         });
 
         return view;
     }
 
-    private void observeTransactions() {
-        transactionViewModel.getAllTransactions().observe(getViewLifecycleOwner(), transactions -> {
-            if (transactions != null && !transactions.isEmpty()) {
-                // Display only the most recent transactions (max 5)
-                int limit = Math.min(transactions.size(), 5);
-                List<Transaction> recentTransactions = transactions.subList(0, limit);
-                transactionAdapter.submitList(recentTransactions);
-            } else {
-                transactionAdapter.submitList(new ArrayList<>());
-            }
-        });
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Observe data changes
+        observeUserData();
+        setupObservers();
     }
 
-    private void observeExpensesByCategory() {
-        transactionViewModel.getExpensesByCategory().observe(getViewLifecycleOwner(), categoryTotals -> {
-            if (categoryTotals != null && !categoryTotals.isEmpty()) {
-                updatePieChart(categoryTotals);
+    private void setupObservers() {
+        LiveData<Double> totalIncome = transactionViewModel.getTotalIncome();
+        if (totalIncome != null) {
+            totalIncome.observe(getViewLifecycleOwner(), income -> {
+                if (income != null) {
+                    tvIncome.setText(CurrencyFormatter.format(income));
+                }
+            });
+        }
+
+        LiveData<Double> totalExpense = transactionViewModel.getTotalExpense();
+        if (totalExpense != null) {
+            totalExpense.observe(getViewLifecycleOwner(), expense -> {
+                if (expense != null) {
+                    tvExpense.setText(CurrencyFormatter.format(expense));
+                }
+            });
+        }
+
+        LiveData<List<Transaction>> allTransactions = transactionViewModel.getAllTransactions();
+        if (allTransactions != null) {
+            allTransactions.observe(getViewLifecycleOwner(), transactions -> {
+                if (transactions != null && !transactions.isEmpty()) {
+                    updateBalance(transactions);
+                    List<Transaction> recentTransactions = transactions.subList(0, Math.min(transactions.size(), 5));
+                    transactionAdapter.submitList(recentTransactions);
+                }
+            });
+        }
+
+        LiveData<List<TransactionDao.CategoryTotal>> expensesByCategory = transactionViewModel.getExpensesByCategory();
+        if (expensesByCategory != null) {
+            expensesByCategory.observe(getViewLifecycleOwner(), this::updatePieChart);
+        }
+    }
+
+    private void updateBalance(List<Transaction> transactions) {
+        double income = 0;
+        double expense = 0;
+        for (Transaction transaction : transactions) {
+            if (transaction.getType().equals("income")) {
+                income += transaction.getAmount();
             } else {
-                chartExpenses.setData(null);
-                chartExpenses.invalidate();
+                expense += transaction.getAmount();
             }
-        });
+        }
+        double balance = income - expense;
+        tvTotalBalance.setText(CurrencyFormatter.format(balance));
     }
 
     private void setupPieChart() {
@@ -153,19 +173,16 @@ public class HomeFragment extends Fragment {
 
     private void updatePieChart(List<TransactionDao.CategoryTotal> categoryTotals) {
         List<PieEntry> entries = new ArrayList<>();
-
         for (TransactionDao.CategoryTotal categoryTotal : categoryTotals) {
-            entries.add(new PieEntry((float) categoryTotal.total, categoryTotal.category));
+            entries.add(new PieEntry((float) categoryTotal.getTotal(), categoryTotal.getCategory()));
         }
 
-        PieDataSet dataSet = new PieDataSet(entries, "Expense Categories");
-        dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
-        dataSet.setValueTextColor(Color.WHITE);
+        PieDataSet dataSet = new PieDataSet(entries, "Expenses by Category");
+        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
         dataSet.setValueTextSize(12f);
 
         PieData data = new PieData(dataSet);
         data.setValueFormatter(new PercentFormatter(chartExpenses));
-
         chartExpenses.setData(data);
         chartExpenses.invalidate();
     }
@@ -175,43 +192,73 @@ public class HomeFragment extends Fragment {
             if (user != null) {
                 tvUserName.setText(user.getName());
                 tvTotalBalance.setText(CurrencyFormatter.format(user.getTotalBalance()));
-                tvIncome.setText(CurrencyFormatter.format(user.getTotalIncome()));
-                tvExpense.setText(CurrencyFormatter.format(user.getTotalExpense()));
 
                 // Set profile image if available
                 if (user.getProfileImagePath() != null && !user.getProfileImagePath().isEmpty()) {
                     try {
-                        Uri imageUri = Uri.parse(user.getProfileImagePath());
-                        Log.d("HomeFragment", "Loading image from: " + imageUri);
-
-                        try {
+                        if (user.getProfileImagePath().startsWith("http")) {
+                            // Load image from URL using Glide
+                            Glide.with(this)
+                                .load(user.getProfileImagePath())
+                                .placeholder(R.drawable.default_profile)
+                                .error(R.drawable.default_profile)
+                                .into(ivProfile);
+                        } else {
+                            Uri imageUri = Uri.parse(user.getProfileImagePath());
                             if (ContentResolver.SCHEME_CONTENT.equals(imageUri.getScheme())) {
-                                // Content URI handling
                                 ivProfile.setImageURI(imageUri);
                             } else {
-                                // File path handling
                                 File imgFile = new File(user.getProfileImagePath());
                                 if (imgFile.exists()) {
                                     Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
                                     ivProfile.setImageBitmap(bitmap);
+                                } else {
+                                    ivProfile.setImageResource(R.drawable.default_profile);
                                 }
                             }
-                        } catch (Exception e) {
-                            Log.e("HomeFragment", "Error loading profile image: " + e.getMessage());
-                            ivProfile.setImageResource(R.drawable.default_profile);
                         }
                     } catch (Exception e) {
-                        Log.e("HomeFragment", "Error parsing image URI: " + e.getMessage());
+                        Log.e("HomeFragment", "Error loading profile image: " + e.getMessage());
                         ivProfile.setImageResource(R.drawable.default_profile);
                     }
                 } else {
                     ivProfile.setImageResource(R.drawable.default_profile);
                 }
             } else {
-                // Create default user if none exists
-                User defaultUser = new User("User", "user@example.com", "", 0, 0, 0);
-                userViewModel.insert(defaultUser);
+                // Check if user exists before creating default user
+                userViewModel.checkUserExists().observe(getViewLifecycleOwner(), exists -> {
+                    if (!exists) {
+                        // Create default user if none exists
+                        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                        if (firebaseUser != null) {
+                            User defaultUser = new User(
+                                firebaseUser.getUid(),
+                                firebaseUser.getDisplayName() != null ? firebaseUser.getDisplayName() : "User",
+                                firebaseUser.getEmail() != null ? firebaseUser.getEmail() : "",
+                                0.0, 0.0, 0.0
+                            );
+                            if (firebaseUser.getPhotoUrl() != null) {
+                                defaultUser.setProfileImagePath(firebaseUser.getPhotoUrl().toString());
+                            }
+                            userViewModel.insert(defaultUser);
+                        }
+                    }
+                });
             }
         });
+    }
+
+    @Override
+    public void onTransactionClick(Transaction transaction) {
+        Bundle bundle = new Bundle();
+        bundle.putString("transactionId", transaction.getId());
+        Navigation.findNavController(requireView())
+                .navigate(R.id.action_homeFragment_to_transactionDetailFragment, bundle);
+    }
+
+    @Override
+    public void onTransactionLongClick(Transaction transaction) {
+        // Show options menu for the transaction
+        // This could be implemented to show a popup menu with options like edit, delete, etc.
     }
 }
